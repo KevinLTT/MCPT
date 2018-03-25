@@ -6,7 +6,7 @@
 
 class Vertex
 {
-private:
+public:
     glm::vec3 position;
     glm::vec3 normal;
     //Material material;
@@ -14,6 +14,8 @@ private:
 public:
     Vertex( glm::vec3 Position, glm::vec3 Normal ): 
         position( Position ), normal( Normal )  {}
+    Vertex( glm::vec3 Position ):
+        position( Position ) {}
 
     glm::vec3 getPosition();
     glm::vec3 getNormal();
