@@ -1,17 +1,24 @@
 #ifndef _BOUNDING_BOX_H
 #define _BOUNDING_BOX_H
 
+#include <memory>
+#include <vector>
+
 #include "Primitive.h"
-#include "Geometry.h"
+#include "Object.h"
 
 class BoundingBox : public Object
 {
 public:
-    Object innerObject;
+    std::vector< std::shared_ptr<Object> > innerObjectList;
 
 public:
-    BoundingBox( Object inner ):
-        innerObject( inner ) {}
+    BoundingBox( std::shared_ptr<Object> inner );
+    BoundingBox( std::vector< std::shared_ptr<Object> > objectList );
+
+    virtual bool  intersect();
+
+    void findMaxMin();
 };
 
 #endif

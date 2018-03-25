@@ -16,6 +16,7 @@ public:
         position( Position ), normal( Normal )  {}
     Vertex( glm::vec3 Position ):
         position( Position ) {}
+    Vertex(){}
 
     glm::vec3 getPosition();
     glm::vec3 getNormal();

@@ -1,6 +1,8 @@
 #ifndef _AABB_H_
 #define _AABB_H_
 
+#include <iostream>
+
 #include "Triangular.h"
 #include "../Scene/Scene.h"
 #include "BoundingBox.h"
@@ -14,12 +16,16 @@
 class AABB : public BoundingBox
 {
 public:
-    AABB( Object inner );
+    //AABB( Object inner ): BoundingBox( inner ) {}
+    AABB( std::shared_ptr<Object> inner ): BoundingBox( inner ) {}
+    //AABB( std::vector<Object> innerList ): BoundingBox( innerList ) {}
+    AABB( std::vector< std::shared_ptr<Object> > innerList ): BoundingBox( innerList ) {}
 
-    void initialize();
-    void findMaxMin();
-    Vertex getMax() { return this->vertices[AABB_MAX_INDEX]; }
-    Vertex getMin() { return this->vertices[AABB_MAX_INDEX]; }
+    virtual bool intersect();
+    //void initialize();
+    //void findMaxMin();
+    //Vertex getMax() { return this->vertices[AABB_MAX_INDEX]; }
+    //Vertex getMin() { return this->vertices[AABB_MAX_INDEX]; }
 };
 
 #endif
