@@ -29,6 +29,7 @@ public:
     
     virtual bool intersect( Ray ray, Intersection& intersection );
     //virtual bool intersect();
+    bool boxIntersect( Ray ray );
 
     void build( int splitAxis );
     //int findGoodAxis();

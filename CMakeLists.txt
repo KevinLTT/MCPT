@@ -6,9 +6,10 @@ find_package( ASSIMP REQUIRED )
 
 add_subdirectory( Scene )
 add_subdirectory( Accelerate )
+add_subdirectory( Ray )
 
 add_executable( sceneTest "sceneTest.cpp" )
 target_link_libraries( sceneTest sceneLib ${ASSIMP_LIBRARIES} )
 
 add_executable( accTest "AccTest.cpp" )
-target_link_libraries( accTest sceneLib accelerateLib ${ASSIMP_LIBRARIES} )
+target_link_libraries( accTest sceneLib accelerateLib rayLib ${ASSIMP_LIBRARIES} )

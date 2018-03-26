@@ -12,11 +12,39 @@ using namespace std;
 
 int main()
 {
+    //bool hello = true;
+    bool hello = false;
+    if( hello )
+    {
+        Vertex A( glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec3( 0.0f, 5.0f, 0.0f ) );
+        Vertex B( glm::vec3( -1.0f, 0.0f, 0.0f ), glm::vec3( -0.5f, 0.0f, 0.0f ) );
+        Vertex C( glm::vec3( 1.0f, 0.0f, 0.0f ), glm::vec3( 0.5f, 0.0f, 0.0f ) );
+        auto m = make_shared<Material>();
+        vector<Vertex> tris = { A, B, C};
+
+        Triangular tri( tris, m );
+
+        Vertex origin( glm::vec3( 0.0f, 0.5f, 1.0f ) );
+        glm::vec3 direction( 0.3f,  0.00f, -1.0f);
+        Ray ray( origin, direction );
+        Intersection inter;
+
+        if( tri.intersect( ray, inter ) )
+            cout << "hit" << endl;
+        else
+            cout << "miss" << endl;
+
+        return 0;
+    }
+
+
     Scene scene( "../Obj/scene01.obj" );
 
     std::vector<Mesh> meshes = scene.getMeshes();
     std::vector<shared_ptr<Object>> trees;
-    Ray ray;
+    Vertex origin( glm::vec3( 2.0f, 2.0f, 6.5f) );
+    glm::vec3 direction( 0.0f, 0.00f, -0.5f );
+    Ray ray( origin, direction);
     Intersection intersection;
     for( auto itr = meshes.begin()+0; itr != meshes.end()-0; itr++ )
     {
@@ -43,8 +71,12 @@ int main()
 
         //KdTree t( boxes );
         shared_ptr<Object> t = make_shared<KdTree>( boxes );
-        t->intersect( ray, intersection );
-        //t->intersect();
+        KdTree tt( boxes );
+        if( t->intersect( ray, intersection ) == true )
+            cout << "hit" << endl;
+        else
+            cout << "miss" << endl;
+
         //t.innerObjectList[0]->intersect();
         trees.push_back( t );
         //std::shared_ptr<Object> ptr = std::make_shared<Object>( boxes[0]);
@@ -54,13 +86,18 @@ int main()
         cout << endl << "Box amount: " << boxes.size() << endl;
     }
 
+
     KdTree tree( trees );
     cout << "root: " << tree.innerObjectList.size() << endl;
     cout << "left" << tree.left->innerObjectList.size() << endl;
     cout << "right" << tree.right->innerObjectList.size() << endl;
 
+
     //tree.intersect( );
-    tree.intersect( ray, intersection );
+    if (tree.intersect( ray, intersection ) )
+        cout << "hit" << endl;
+    else
+        cout << "miss" << endl;
 
     return 0;
 }

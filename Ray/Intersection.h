@@ -13,7 +13,8 @@ class Intersection
 {
 public:
     Vertex point;
-    Material material;
+    float t;
+    std::shared_ptr<Material> material;
     std::shared_ptr<Object> obj;
 
 public:

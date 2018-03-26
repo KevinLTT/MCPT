@@ -5,9 +5,52 @@
 
 bool AABB::intersect( Ray ray, Intersection& intersection ) 
 { 
-    std::cout << "AABB" << std::endl; 
-    innerObjectList[0]->intersect( ray, intersection );
-    return true; 
+    //std::cout << "AABB" << std::endl; 
+    if( boxIntersect( ray ) == false )
+        return false;
+
+    if( !innerObjectList.empty() && innerObjectList[0]->intersect( ray, intersection ) )
+    {
+        intersection.obj = innerObjectList[0];
+        return true;
+    }
+    else
+        return false;
+
+}
+
+bool AABB::boxIntersect( Ray ray )
+{
+    for( int axis = X_AXIS; axis <= Z_AXIS; axis++ )
+    {
+        if( fabs( ray.getDirection( axis ) ) <= EPSILON )
+            if( ray.getOrigin( axis ) < getMin( axis ) || ray.getOrigin( axis ) > getMax( axis ) )
+                return false;
+    }
+
+    float tNear = OBJECT_MIN;
+    float tFar = OBJECT_MAX;
+    for( int axis = X_AXIS; axis <= Z_AXIS; axis++ )
+    {
+        float t1 = ( getMin(axis) - ray.getOrigin( axis ) ) / ray.getDirection( axis );
+        float t2 = ( getMax(axis) - ray.getOrigin( axis ) ) / ray.getDirection( axis );
+        if( t1 > t2 )
+        {
+            float temp = t1;
+            t1 = t2;
+            t2 = temp;
+        }
+
+        if( t1 > tNear )
+            tNear = t1;
+        if( t2 < tFar )
+            tFar = t2;
+    }
+
+    if( tNear > tFar || tFar <= EPSILON )
+        return false;
+    else 
+        return true;
 }
 /*bool AABB::intersect()
 { 

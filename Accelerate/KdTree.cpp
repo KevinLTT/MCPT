@@ -12,9 +12,6 @@ KdTree::KdTree( std::vector< std::shared_ptr<Object> > innerList ): BoundingBox(
 
 void KdTree::build( int splitAxis )
 {
-    if( innerObjectList.size() == 18 )
-        int a = 10;
-
     axis = splitAxis;
 
     if( this->innerObjectList.size() <= LEAF_OBJ_NUM )
@@ -145,10 +142,123 @@ int KdTree::findMin( int splitAxis, std::vector< std::shared_ptr<Object> > list 
 
 bool KdTree::intersect( Ray ray, Intersection& intersection )  
 { 
-    std::cout << "KdTree" << std::endl; 
-    if( !innerObjectList.empty() )
-        innerObjectList[0]->intersect( ray, intersection );
+    //std::cout << "KdTree" << std::endl; 
+    if( !boxIntersect( ray ) )
+        return false;
+
+    if( isLeaf == true)
+    {
+        if( !innerObjectList.empty() )
+            return innerObjectList[0]->intersect( ray, intersection );
+        else
+            return false;
+    }
+
+    if( fabs( ray.getDirection( this->axis )  ) <= EPSILON )
+    {
+        Intersection leftInter, rightInter;
+        bool leftFind = left->intersect( ray, intersection );
+        leftInter = intersection;
+        bool rightFind = right->intersect( ray, intersection );
+        rightInter = intersection;
+
+        if( leftFind && rightFind )
+        {
+            intersection = ( leftInter.t < rightInter.t ) ? leftInter : rightInter;
+            return true;
+        }
+        else
+            return leftFind | rightFind;
+    }
+
+    if( ray.getDirection( this->axis ) >= 0 )
+    {
+        bool find = left->intersect( ray, intersection );    
+        if( find == true )
+        {
+            auto leftIntersection = intersection;
+            glm::vec3 interObjMax = leftIntersection.obj->getMax();
+            glm::vec3 interObjMin = leftIntersection.obj->getMin();
+
+            if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
+                interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
+            {
+                if( right->intersect( ray, intersection ) == true )
+                {
+                    auto rightInterObj = intersection;
+                    intersection = ( leftIntersection.t < rightInterObj.t ) ? leftIntersection : rightInterObj;
+                }
+                else
+                    intersection = leftIntersection;
+            }
+                
+            return true;
+        }
+        else
+            return right->intersect( ray, intersection );
+    }
+    else 
+    {
+        bool find = right->intersect( ray, intersection );
+        if( find == true )
+        {
+            auto rightIntersection = intersection;
+            glm::vec3 interObjMax = rightIntersection.obj->getMax();
+            glm::vec3 interObjMin = rightIntersection.obj->getMin();
+
+            if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
+                interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
+            {
+                if( left->intersect( ray, intersection ) == true )
+                {
+                    auto leftInterObj = intersection;
+                    intersection = ( rightIntersection.t < leftInterObj.t ) ? rightIntersection : leftInterObj;
+                }
+                else
+                    intersection = rightIntersection;
+            }
+                
+            return true;
+        }
+        else
+            return left->intersect( ray, intersection );
+    }
+    
     return true; 
+}
+
+bool KdTree::boxIntersect( Ray ray )
+{
+    for( int axis = X_AXIS; axis <= Z_AXIS; axis++ )
+    {
+        if( fabs( ray.getDirection( axis ) ) <= EPSILON )
+            if( ray.getOrigin( axis ) < getMin( axis ) || ray.getOrigin( axis ) > getMax( axis ) )
+                return false;
+    }
+
+    float tNear = OBJECT_MIN;
+    float tFar = OBJECT_MAX;
+    for( int axis = X_AXIS; axis <= Z_AXIS; axis++ )
+    {
+        float t1 = ( getMin(axis) - ray.getOrigin( axis ) ) / ray.getDirection( axis );
+        float t2 = ( getMax(axis) - ray.getOrigin( axis ) ) / ray.getDirection( axis );
+        if( t1 > t2 )
+        {
+            float temp = t1;
+            t1 = t2;
+            t2 = temp;
+        }
+
+        if( t1 > tNear )
+            tNear = t1;
+        if( t2 < tFar )
+            tFar = t2;
+    }
+
+    if( tNear > tFar || tFar <= EPSILON )
+        return false;
+    else 
+        return true;
 }
 
 /*bool KdTree::intersect( )

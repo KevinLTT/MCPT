@@ -22,6 +22,7 @@ public:
     AABB( std::vector< std::shared_ptr<Object> > innerList ): BoundingBox( innerList ) {}
 
     virtual bool intersect( Ray ray, Intersection& intersection );
+    bool boxIntersect( Ray ray );
     //virtual bool intersect( );
     //void initialize();
     //void findMaxMin();

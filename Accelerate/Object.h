@@ -6,15 +6,7 @@
 #include "../Scene/Scene.h"
 #include "../Ray/Ray.h"
 #include "../Ray/Intersection.h"
-
-#define OBJECT_MAX 10000000
-#define OBJECT_MIN -1000000
-
-#define X_AXIS 0
-#define Y_AXIS 1
-#define Z_AXIS 2
-
-#define EPSILON 0.00001
+#include "../Config/config.h"
 
 class Object
 {
