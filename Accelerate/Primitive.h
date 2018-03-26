@@ -17,7 +17,8 @@ public:
 public:
     Primitive( std::vector<Vertex> Vertices, std::shared_ptr<Material> m );
 
-    virtual bool intersect();
+    virtual bool intersect( Ray ray, Intersection& intersection) = 0;
+    //virtual bool intersect();
 
     void findMaxMin();
 

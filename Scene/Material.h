@@ -20,6 +20,7 @@ public:
 
 public:
     Material( aiMaterial* aMaterial );
+    Material() = default;
     
     /*glm::vec3 getAmbient();
     glm::vec3 getDiffuse();

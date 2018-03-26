@@ -12,42 +12,62 @@ KdTree::KdTree( std::vector< std::shared_ptr<Object> > innerList ): BoundingBox(
 
 void KdTree::build( int splitAxis )
 {
+    if( innerObjectList.size() == 18 )
+        int a = 10;
+
     axis = splitAxis;
 
-    if( this->innerObjectList.size() <= 1 )
+    if( this->innerObjectList.size() <= LEAF_OBJ_NUM )
+    {
+        isLeaf = true;
         return;
+    }
+    else
+        isLeaf = false;
 
     std::vector< std::shared_ptr<Object> > leftList, rightList;
     partitionInnerObjectList( leftList, rightList );
 
+    //std::vector<std::shared_ptr<Object>>().swap( innerObjectList ); //todo
     left = std::make_shared<KdTree>( leftList );
     right = std::make_shared<KdTree>( rightList );
 }
 
 void KdTree::partitionInnerObjectList( std::vector< std::shared_ptr<Object> >& leftList, std::vector< std::shared_ptr<Object> >& rightList )
 {
-    int minDifference = innerObjectList.size();
+    int minDifference = innerObjectList.size() + 1;
+    //unsigned int minTotalObjNumber = innerObjectList.size() * 2 + 1;
 
     for( int splitAxis = X_AXIS; splitAxis <= Z_AXIS; splitAxis++ )
     {
         std::vector< std::shared_ptr<Object> > left, right;
-        float pivot = ( getMax( splitAxis ) + getMin( splitAxis ) ) / 2;
-
+        //sortObjList( splitAxis, innerObjectList );
+        float pivot = findPivot( splitAxis );
         for( auto obj = innerObjectList.begin(); obj != innerObjectList.end(); obj++ )
         {
             float center = ( (*obj)->getMax( splitAxis ) + (*obj)->getMin( splitAxis ) ) / 2;
-            if( center < pivot )
+            //float objMin = (*obj)->getMin( splitAxis );
+            //float objMax = (*obj)->getMax( splitAxis );
+            if( center <= pivot + EPSILON )
                 left.push_back( *obj );
-            else
+            else //if( objMin > pivot - EPSILON )
                 right.push_back( *obj );
+            /*else
+            {
+                left.push_back( *obj );
+                right.push_back( *obj );
+            }*/
         }
 
+        //unsigned int totalObjNumber = left.size() + right.size();
         int difference = ( left.size() > right.size() ) ? left.size() - right.size() : right.size() - left.size() ;
-        if( difference <= minDifference )
+        //if( totalObjNumber < minTotalObjNumber || ( totalObjNumber == minTotalObjNumber && difference < minDifference ) )
+        if( difference < minDifference )
         {
             leftList = left;
             rightList = right;
             minDifference = difference;
+            //minTotalObjNumber = totalObjNumber;
             this->axis = splitAxis;
         }
     }
@@ -55,26 +75,89 @@ void KdTree::partitionInnerObjectList( std::vector< std::shared_ptr<Object> >& l
     //in case that one of the tweo lists are empty, put the object nearest to the pivot to right list
     if( leftList.size() >= 2 && rightList.size() == 0 )
     {
-        sortObjList( this->axis, leftList );
-        rightList.push_back( leftList[0] );
-        leftList.erase( leftList.begin() );
+        //sortObjList( this->axis, leftList );
+        int maxIndex = findMax( this->axis, leftList );
+        rightList.push_back( leftList[maxIndex] );
+        leftList.erase( leftList.begin()+maxIndex );
     }
 
 
     if( rightList.size() >= 2 && leftList.size() == 0 )
     {
-        sortObjList( this->axis, rightList );
-        leftList.push_back( rightList[0] );
-        rightList.erase( rightList.begin() );
+        //sortObjList( this->axis, rightList );
+        int minIndex = findMin( this->axis, rightList );
+        leftList.push_back( rightList[minIndex] );
+        rightList.erase( rightList.begin()+minIndex );
     }
 }
 
-bool KdTree::intersect() 
+float KdTree::findPivot( int splitAxis )
+{
+    float sum = 0;
+    for( auto itr = innerObjectList.begin(); itr != innerObjectList.end(); itr++ )
+    {
+        sum += (*itr)->getMax( splitAxis ) + (*itr)->getMin( splitAxis );
+    }
+
+    return sum / ( 2 * innerObjectList.size() );
+}
+
+int KdTree::findMax( int splitAxis, std::vector< std::shared_ptr<Object> > list )
+{
+    if( list.empty() )
+        return -1;
+
+    int maxIndex = 0;
+    auto maxValue = list[0]->getMax( splitAxis );
+
+    for( unsigned int i = 1; i < list.size(); i++ )
+    {
+        if( list[i]->getMax(splitAxis) > maxValue )
+        {
+            maxIndex = i;
+            maxValue = list[i]->getMax( splitAxis );
+        }
+    }
+
+    return maxIndex;
+}
+
+int KdTree::findMin( int splitAxis, std::vector< std::shared_ptr<Object> > list )
+{
+    if( list.empty() )
+        return -1;
+
+    int minIndex = 0;
+    auto minValue = list[0]->getMin( splitAxis );
+
+    for( unsigned int i = 1; i < list.size(); i++ )
+    {
+        if( list[i]->getMin(splitAxis) < minValue )
+        {
+            minIndex = i;
+            minValue = list[i]->getMin( splitAxis );
+        }
+    }
+
+    return minIndex;
+}
+
+
+bool KdTree::intersect( Ray ray, Intersection& intersection )  
 { 
     std::cout << "KdTree" << std::endl; 
-    innerObjectList[0]->intersect();
+    if( !innerObjectList.empty() )
+        innerObjectList[0]->intersect( ray, intersection );
     return true; 
 }
+
+/*bool KdTree::intersect( )
+{ 
+    std::cout << "KdTree" << std::endl; 
+    if( !innerObjectList.empty() )
+        innerObjectList[0]->intersect();
+    return true; 
+}*/
 
 void KdTree::sortObjList( int axis, std::vector< std::shared_ptr<Object> >& list )
 {
@@ -82,24 +165,28 @@ void KdTree::sortObjList( int axis, std::vector< std::shared_ptr<Object> >& list
     {
     case X_AXIS:
         std::sort( list.begin(), list.end(), cmpObjX );
+        break;
     case Y_AXIS:
         std::sort( list.begin(), list.end(), cmpObjY );
+        break;
     case Z_AXIS:
+    default:
         std::sort( list.begin(), list.end(), cmpObjZ );
+        break;
     }
 }
 
 bool KdTree::cmpObjX( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 )
 {
-    return obj1->getMax().x <= obj2->getMax().x;
+    return obj1->getMax(X_AXIS) <= obj2->getMax(X_AXIS);
 }
 
 bool KdTree::cmpObjY( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 )
 {
-    return obj1->getMax().y <= obj2->getMax().y;
+    return obj1->getMax(Y_AXIS) <= obj2->getMax(Y_AXIS);
 }
 
 bool KdTree::cmpObjZ( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 )
 {
-    return obj1->getMax().z <= obj2->getMax().z;
+    return obj1->getMax(Z_AXIS) <= obj2->getMax(Z_AXIS);
 }

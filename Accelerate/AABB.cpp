@@ -3,12 +3,18 @@
 #include "AABB.h"
 
 
-bool AABB::intersect() 
+bool AABB::intersect( Ray ray, Intersection& intersection ) 
 { 
     std::cout << "AABB" << std::endl; 
-    innerObjectList[0]->intersect();
+    innerObjectList[0]->intersect( ray, intersection );
     return true; 
 }
+/*bool AABB::intersect()
+{ 
+    std::cout << "AABB" << std::endl; 
+    innerObjectList[0]->intersect(  );
+    return true; 
+}*/
 //AABB::AABB ( Object inner ):
     //BoundingBox( inner  )
 //{}

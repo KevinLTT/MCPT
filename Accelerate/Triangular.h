@@ -15,7 +15,8 @@ public:
     Triangular( std::vector<Vertex> v, std::shared_ptr<Material> m ) :
         Primitive( v, m ) {}
 
-    virtual bool intersect();
+    virtual bool intersect( Ray ray, Intersection& intersection );
+    //virtual bool intersect();
 };
 
 #endif

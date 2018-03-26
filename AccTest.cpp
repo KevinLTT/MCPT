@@ -16,7 +16,9 @@ int main()
 
     std::vector<Mesh> meshes = scene.getMeshes();
     std::vector<shared_ptr<Object>> trees;
-    for( auto itr = meshes.begin(); itr != meshes.end(); itr++ )
+    Ray ray;
+    Intersection intersection;
+    for( auto itr = meshes.begin()+0; itr != meshes.end()-0; itr++ )
     {
         itr->material.show();
         cout << "Vertex amount: " << itr->vertices.size() << endl;
@@ -30,16 +32,19 @@ int main()
             vector<Vertex> tris = { itr->vertices[i], itr->vertices[i+1], itr->vertices[i+2] };
             shared_ptr<Object> prim = make_shared<Triangular>( tris, m );
             shared_ptr<Object> box = make_shared<AABB>( prim );
-            //box->intersect();
+            //box->intersect( ray, intersection );
 
             prims.push_back( prim );
             boxes.push_back( box );
+
+            Intersection inter;
         }
         //boxes[0]->intersect();
 
         //KdTree t( boxes );
         shared_ptr<Object> t = make_shared<KdTree>( boxes );
-        //t.intersect();
+        t->intersect( ray, intersection );
+        //t->intersect();
         //t.innerObjectList[0]->intersect();
         trees.push_back( t );
         //std::shared_ptr<Object> ptr = std::make_shared<Object>( boxes[0]);
@@ -53,7 +58,9 @@ int main()
     cout << "root: " << tree.innerObjectList.size() << endl;
     cout << "left" << tree.left->innerObjectList.size() << endl;
     cout << "right" << tree.right->innerObjectList.size() << endl;
-    tree.innerObjectList[0]->intersect();
+
+    //tree.intersect( );
+    tree.intersect( ray, intersection );
 
     return 0;
 }

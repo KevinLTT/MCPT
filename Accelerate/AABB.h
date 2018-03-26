@@ -21,7 +21,8 @@ public:
     //AABB( std::vector<Object> innerList ): BoundingBox( innerList ) {}
     AABB( std::vector< std::shared_ptr<Object> > innerList ): BoundingBox( innerList ) {}
 
-    virtual bool intersect();
+    virtual bool intersect( Ray ray, Intersection& intersection );
+    //virtual bool intersect( );
     //void initialize();
     //void findMaxMin();
     //Vertex getMax() { return this->vertices[AABB_MAX_INDEX]; }

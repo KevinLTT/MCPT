@@ -14,11 +14,17 @@ BoundingBox::BoundingBox( std::vector< std::shared_ptr<Object> > objectList ):
     findMaxMin();
 }
 
-bool BoundingBox::intersect()
+/*bool BoundingBox::intersect( Ray ray, Intersection& intersection )
 {
     std::cout << "BoundingBox" << std::endl;
     return true;
 }
+*/
+/*bool BoundingBox::intersect()
+{
+    std::cout << "BoundingBox" << std::endl;
+    return true;
+}*/
 
 void BoundingBox::findMaxMin()
 {

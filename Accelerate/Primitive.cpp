@@ -9,11 +9,11 @@ Primitive::Primitive( std::vector<Vertex> Vertices, std::shared_ptr<Material> m 
     findMaxMin();
 }
 
-bool Primitive::intersect()
-{
-    std::cout << "Primitive" << std::endl;
-    return true;
-}
+//bool Primitive::intersect()
+//{
+    //std::cout << "Primitive" << std::endl;
+    //return true;
+//}
 
 void Primitive::findMaxMin()
 {
