@@ -5,24 +5,27 @@
 #include <memory>
 
 #include "../Scene/Scene.h"
+#include "../Scene/Normal.h"
 
 class Ray
 {
 public:
     //std::shared_ptr<Vertex> origin;
     Vertex origin;
-    glm::vec3 direction;
+    //glm::vec3 direction;
+    Normal direction;
     float t;
 
 public:
     Ray() = default;
     Ray( Vertex v, glm::vec3 dir );
+    Ray( Vertex v, Normal d ): origin(v), direction(d) {}
     //Ray( std::shared_ptr<Vertex> vptr, glm::vec3 dir );
 
     //std::shared_ptr<Vertex> getOrigin();
     Vertex getOrigin();
     float getOrigin( int axis );
-    glm::vec3 getDirection();
+    Normal getDirection();
     float getDirection( int axis );
 
     void normalize();

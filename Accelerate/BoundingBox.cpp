@@ -30,12 +30,12 @@ void BoundingBox::findMaxMin()
 {
     for( auto obj = innerObjectList.begin(); obj != innerObjectList.end(); obj++ )
     {
-        max.x = fmax( max.x, (*obj)->getMax().x );
-        max.y = fmax( max.y, (*obj)->getMax().y );
-        max.z = fmax( max.z, (*obj)->getMax().z );
+        max.x = fmax( max.x, (*obj)->getMax( X_AXIS ) );
+        max.y = fmax( max.y, (*obj)->getMax( Y_AXIS ) );
+        max.z = fmax( max.z, (*obj)->getMax( Z_AXIS ) );
 
-        min.x = fmin( min.x, (*obj)->getMin().x );
-        min.y = fmin( min.y, (*obj)->getMin().y );
-        min.z = fmin( min.z, (*obj)->getMin().z );
+        min.x = fmin( min.x, (*obj)->getMin( X_AXIS ) );
+        min.y = fmin( min.y, (*obj)->getMin( Y_AXIS ) );
+        min.z = fmin( min.z, (*obj)->getMin( Z_AXIS ) );
     }
 }

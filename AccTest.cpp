@@ -7,8 +7,14 @@
 #include "Accelerate/Triangular.h"
 #include "Accelerate/Primitive.h"
 #include "Accelerate/KdTree.h"
+#include "Camera/Camera.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "PathTracing/PathTracing.h"
+
+#include <opencv2/opencv.hpp>
 
 using namespace std;
+using namespace cv;
 
 int main()
 {
@@ -46,7 +52,7 @@ int main()
     glm::vec3 direction( 0.0f, 0.00f, -0.5f );
     Ray ray( origin, direction);
     Intersection intersection;
-    for( auto itr = meshes.begin()+0; itr != meshes.end()-0; itr++ )
+    for( auto itr = meshes.begin()+2; itr != meshes.end()-3; itr++ )
     {
         itr->material.show();
         cout << "Vertex amount: " << itr->vertices.size() << endl;
@@ -89,8 +95,8 @@ int main()
 
     KdTree tree( trees );
     cout << "root: " << tree.innerObjectList.size() << endl;
-    cout << "left" << tree.left->innerObjectList.size() << endl;
-    cout << "right" << tree.right->innerObjectList.size() << endl;
+    //cout << "left" << tree.left->innerObjectList.size() << endl;
+    //cout << "right" << tree.right->innerObjectList.size() << endl;
 
 
     //tree.intersect( );
@@ -98,6 +104,51 @@ int main()
         cout << "hit" << endl;
     else
         cout << "miss" << endl;
+
+    Camera c;
+    Ray r = c.generateRay( 400, 300 );
+
+    /*
+    glm::mat4x4 model;
+    //model = glm::translate( model, glm::vec3( 0.0f, 0.0f, -5.0f) );
+    model = glm::rotate( model, glm::radians( -90.0f), glm::vec3( 1.0f, 0.0f, 0.0f) );
+    c.transform( model );
+
+    Ray r1 = c.generateRay( 400, 300 );
+    */
+    glm::mat4x4 t;
+    t = glm::rotate( t, glm::radians( -90.0f ), glm::vec3(0.0f, 0.0f, 1.0f) );
+    t = glm::translate( t, glm::vec3( -0.0f, 0.1f, 1.3f) );
+    c.transform( t );
+
+    cv::Mat img( 600, 800, CV_8UC1, cv::Scalar(255) );
+
+    int hitNum = 0;
+    Intersection inter;
+    for( int i = 0; i < c.getHeight(); i++ )
+        for( int j = 0; j < c.getWidth(); j++ )
+        {
+            Ray ray = c.generateRay( j, i );
+            if( tree.intersect( ray, inter))
+            {
+                hitNum++;
+                img.at<uchar>( i, j ) = 0;
+            }
+
+        }
+
+    cout << "total hit: " << hitNum << endl;
+
+    //cv::imshow( "test", img );
+    //cv::waitKey( 0 );
+
+    PathTracing pt;
+    shared_ptr<Object> Tree = make_shared<KdTree>( trees );
+    cout << Tree->getMax(0) << " " << Tree->getMax(1) << " " << Tree->getMax(2) << endl;
+    cout << Tree->getMin(0) << " " << Tree->getMin(1) << " " << Tree->getMin(2) << endl;
+    Mat image = pt.render( Tree, c );
+    imshow( "test", image );
+    waitKey( 0 );
 
     return 0;
 }

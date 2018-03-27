@@ -48,6 +48,11 @@ public:
             return min.z;
         }
     }
+    void showMaxMin()
+    {
+        std::cout << "max: " << max.x << ", " << max.y << ", " << max.z << std::endl;
+        std::cout << "min: " << min.x << ", " << min.y << ", " << min.z << std::endl;
+    }
 
     //virtual bool intersect() { std::cout << "Object" << std::endl; return true; }
     virtual bool intersect( Ray ray, Intersection& intersection ) = 0; //.{ std::cout << "Object" << std::endl; return false; };

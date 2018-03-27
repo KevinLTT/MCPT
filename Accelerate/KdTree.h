@@ -3,9 +3,13 @@
 
 #include <memory>
 #include <iostream>
+#include <vector>
 
 #include "Object.h"
 #include "BoundingBox.h"
+#include "../Scene/Scene.h"
+#include "AABB.h"
+#include "Triangular.h"
 
 #define LEAF_OBJ_NUM 1
 
@@ -42,6 +46,8 @@ public:
     static bool cmpObjX( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 );
     static bool cmpObjY( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 );
     static bool cmpObjZ( const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2 );
+    static std::shared_ptr<KdTree> buildTree( Mesh mesh );
+    static std::shared_ptr<KdTree> buildTree( std::vector<Mesh> meshes );
 };
 
 

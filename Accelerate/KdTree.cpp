@@ -300,3 +300,39 @@ bool KdTree::cmpObjZ( const std::shared_ptr<Object>& obj1, const std::shared_ptr
 {
     return obj1->getMax(Z_AXIS) <= obj2->getMax(Z_AXIS);
 }
+
+std::shared_ptr<KdTree> KdTree::buildTree( Mesh mesh )
+{
+    std::shared_ptr<Material> m = std::make_shared<Material>( mesh.material );
+    std::vector<std::shared_ptr<Object>> prims;
+    std::vector<std::shared_ptr<Object>> boxes;
+    for( unsigned int i = 0; i < mesh.indices.size()-2; i += 3 )
+    {
+        std::vector<Vertex> vs = { mesh.vertices[mesh.indices[i]], mesh.vertices[mesh.indices[i+1]], mesh.vertices[mesh.indices[i+2]] };
+        std::shared_ptr<Object> prim = std::make_shared<Triangular>( vs, m );
+        std::cout << "prim: " << std::endl;
+        prim->showMaxMin();
+        std::shared_ptr<Object> box = std::make_shared<AABB>( prim );
+        std::cout << "box: " << std::endl;
+        box->showMaxMin();
+
+        prims.push_back( prim );
+        boxes.push_back( box );
+    }
+
+    return std::make_shared<KdTree>( boxes );
+}
+
+std::shared_ptr<KdTree> KdTree::buildTree( std::vector<Mesh> meshes )
+{
+    std::vector<std::shared_ptr<Object>> trees;
+    for( auto itr = meshes.begin(); itr != meshes.end(); itr++ )
+    {
+        std::shared_ptr<Object> tempTree = buildTree( *itr );
+        std::cout << "temp tree: " << std::endl;
+        tempTree->showMaxMin();
+        trees.push_back( tempTree );
+    }
+
+    return std::make_shared<KdTree>( trees );
+}
