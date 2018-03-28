@@ -8,7 +8,7 @@ Camera::Camera( int Width, int Height, float Fov ):
     camera2world( glm::mat4( 1.0f ) )
 {}
 
-Ray Camera::generateRay( int Px, int Py )
+Ray Camera::generateRay( float Px, float Py )
 {
     float px, py;
     px = ( 2 * ( (Px+0.5) / (float)width ) - 1 ) * tan( deg2rad(fov) / 2 ) * aspectRatio;
@@ -16,8 +16,10 @@ Ray Camera::generateRay( int Px, int Py )
 
     glm::vec4 dir4f( px, py, -1, 1 );
     dir4f = camera2world * dir4f;
+    glm::vec3 rayPWorld = glm::vec3( dir4f.x/dir4f.w, dir4f.y/dir4f.w, dir4f.z/dir4f.w );
+    glm::vec3 rayWorld = glm::vec3( rayPWorld.x - position.x, rayPWorld.y - position.y, rayPWorld.z - position.z );
 
-    Normal dir( glm::vec3( dir4f.x/dir4f.w, dir4f.y/dir4f.w, dir4f.z/dir4f.w ) );
+    Normal dir( rayWorld );
     Ray ray( Vertex( glm::vec3( position.x, position.y, position.z ) ), dir );
 
     return ray;

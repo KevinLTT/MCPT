@@ -14,13 +14,15 @@ Material::Material( aiMaterial* aMaterial )
     aMaterial->Get( AI_MATKEY_NAME, aName );
     this->name = std::string( aName.C_Str() );
 
-    aiColor3D ka, kd, ks;
+    aiColor3D ka, kd, ks, emi;
     aMaterial->Get( AI_MATKEY_COLOR_AMBIENT, ka );
     aMaterial->Get( AI_MATKEY_COLOR_DIFFUSE, kd );
     aMaterial->Get( AI_MATKEY_COLOR_SPECULAR, ks );
+    aMaterial->Get( AI_MATKEY_COLOR_EMISSIVE, emi );
     this->ambient = aiColor3DtoGlmVec3( ka );
     this->diffuse = aiColor3DtoGlmVec3( kd );
     this->specular = aiColor3DtoGlmVec3( ks );
+    this->emission = aiColor3DtoGlmVec3( emi );
 
     float tf;
     aMaterial->Get( AI_MATKEY_COLOR_TRANSPARENT, tf );
@@ -39,6 +41,7 @@ void Material::show()
     std::cout << "Specular: " << specular.x << ", " << specular.y << ", " << specular.z << std::endl;
     std::cout << "Transparent: " << transparent << std::endl;
     std::cout << "Optical Density: " << opticalDensity << std::endl;
+    std::cout << "Emission: " << emission.x << ", " << emission.y << ", " << emission.z << std::endl;
 }
 
 glm::vec3 aiColor3DtoGlmVec3( aiColor3D aColor )

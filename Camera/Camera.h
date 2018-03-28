@@ -20,7 +20,7 @@ private:
 
 public:
     Camera( int Width = 800, int Height = 600, float Fov = 75 );
-    Ray generateRay( int Px, int Py );
+    Ray generateRay( float Px, float Py );
     float deg2rad( const float& deg ) { return deg * M_PI / 180; }
     void transform( glm::mat4x4 t );
     int getWidth() { return width; }

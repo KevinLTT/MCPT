@@ -45,7 +45,7 @@ void KdTree::partitionInnerObjectList( std::vector< std::shared_ptr<Object> >& l
             float center = ( (*obj)->getMax( splitAxis ) + (*obj)->getMin( splitAxis ) ) / 2;
             //float objMin = (*obj)->getMin( splitAxis );
             //float objMax = (*obj)->getMax( splitAxis );
-            if( center <= pivot + EPSILON )
+            if( center <= pivot )
                 left.push_back( *obj );
             else //if( objMin > pivot - EPSILON )
                 right.push_back( *obj );
@@ -104,15 +104,15 @@ int KdTree::findMax( int splitAxis, std::vector< std::shared_ptr<Object> > list 
     if( list.empty() )
         return -1;
 
-    int maxIndex = 0;
-    auto maxValue = list[0]->getMax( splitAxis );
-
-    for( unsigned int i = 1; i < list.size(); i++ )
+    int maxIndex = -1;
+    auto maxValue = OBJECT_MIN;
+    for( unsigned int i = 0; i < list.size(); i++ )
     {
-        if( list[i]->getMax(splitAxis) > maxValue )
+        float center = ( list[i]->getMax(splitAxis) + list[i]->getMin(splitAxis) ) / 2;
+        if( center > maxValue )
         {
             maxIndex = i;
-            maxValue = list[i]->getMax( splitAxis );
+            maxValue = center;
         }
     }
 
@@ -125,14 +125,14 @@ int KdTree::findMin( int splitAxis, std::vector< std::shared_ptr<Object> > list 
         return -1;
 
     int minIndex = 0;
-    auto minValue = list[0]->getMin( splitAxis );
-
-    for( unsigned int i = 1; i < list.size(); i++ )
+    auto minValue = OBJECT_MAX;
+    for( unsigned int i = 0; i < list.size(); i++ )
     {
-        if( list[i]->getMin(splitAxis) < minValue )
+        float center = ( list[i]->getMax(splitAxis) + list[i]->getMin(splitAxis) ) / 2;
+        if( center > minValue )
         {
             minIndex = i;
-            minValue = list[i]->getMin( splitAxis );
+            minValue = center;
         }
     }
 
@@ -177,12 +177,12 @@ bool KdTree::intersect( Ray ray, Intersection& intersection )
         if( find == true )
         {
             auto leftIntersection = intersection;
-            glm::vec3 interObjMax = leftIntersection.obj->getMax();
-            glm::vec3 interObjMin = leftIntersection.obj->getMin();
+            //glm::vec3 interObjMax = leftIntersection.obj->getMax();
+            //glm::vec3 interObjMin = leftIntersection.obj->getMin();
 
-            if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
-                interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
-            {
+            //if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
+                //interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
+            //{
                 if( right->intersect( ray, intersection ) == true )
                 {
                     auto rightInterObj = intersection;
@@ -190,7 +190,7 @@ bool KdTree::intersect( Ray ray, Intersection& intersection )
                 }
                 else
                     intersection = leftIntersection;
-            }
+            //}
                 
             return true;
         }
@@ -203,12 +203,12 @@ bool KdTree::intersect( Ray ray, Intersection& intersection )
         if( find == true )
         {
             auto rightIntersection = intersection;
-            glm::vec3 interObjMax = rightIntersection.obj->getMax();
-            glm::vec3 interObjMin = rightIntersection.obj->getMin();
+            //glm::vec3 interObjMax = rightIntersection.obj->getMax();
+            //glm::vec3 interObjMin = rightIntersection.obj->getMin();
 
-            if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
-                interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
-            {
+            //if( interObjMax.x > getMax( X_AXIS ) || interObjMax.y > getMax( Y_AXIS ) || interObjMax.z > getMax( Z_AXIS ) ||
+                //interObjMin.x < getMin( X_AXIS ) || interObjMin.y < getMin( Y_AXIS ) || interObjMin.z < getMin( Z_AXIS ) )
+            //{
                 if( left->intersect( ray, intersection ) == true )
                 {
                     auto leftInterObj = intersection;
@@ -216,7 +216,7 @@ bool KdTree::intersect( Ray ray, Intersection& intersection )
                 }
                 else
                     intersection = rightIntersection;
-            }
+            //}
                 
             return true;
         }
@@ -310,11 +310,7 @@ std::shared_ptr<KdTree> KdTree::buildTree( Mesh mesh )
     {
         std::vector<Vertex> vs = { mesh.vertices[mesh.indices[i]], mesh.vertices[mesh.indices[i+1]], mesh.vertices[mesh.indices[i+2]] };
         std::shared_ptr<Object> prim = std::make_shared<Triangular>( vs, m );
-        std::cout << "prim: " << std::endl;
-        prim->showMaxMin();
         std::shared_ptr<Object> box = std::make_shared<AABB>( prim );
-        std::cout << "box: " << std::endl;
-        box->showMaxMin();
 
         prims.push_back( prim );
         boxes.push_back( box );
@@ -329,8 +325,6 @@ std::shared_ptr<KdTree> KdTree::buildTree( std::vector<Mesh> meshes )
     for( auto itr = meshes.begin(); itr != meshes.end(); itr++ )
     {
         std::shared_ptr<Object> tempTree = buildTree( *itr );
-        std::cout << "temp tree: " << std::endl;
-        tempTree->showMaxMin();
         trees.push_back( tempTree );
     }
 

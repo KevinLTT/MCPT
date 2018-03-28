@@ -13,10 +13,10 @@ using namespace std;
 using namespace cv;
 
 #define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-#define FOV 90
+#define SCREEN_HEIGHT 800
+#define FOV 70
 
-#define MOVE_SPEED 0.1
+#define MOVE_SPEED 1
 
 #define LEFT 97
 #define UP 119
@@ -27,6 +27,9 @@ using namespace cv;
 #define TURN_RIGHT 107
 #define ZOOM_IN 105
 #define ZOOM_OUT 111
+
+#define LOOK_DOWN 102
+#define LOOK_UP 114
 
 int main()
 {
@@ -73,16 +76,29 @@ int main()
 */
     Scene scene( "../Obj/scene01.obj" );
     vector<Mesh> meshes;
-    meshes.push_back( scene.getMeshes().at(0));
-    meshes.push_back( scene.getMeshes().at(1));
-    cout << meshes.size() << endl;
-    Mesh see = scene.getMeshes().at(1);
-    meshes.push_back( scene.getMeshes().at(2));
-    meshes.push_back( scene.getMeshes().at(3));
-    meshes.push_back( scene.getMeshes().at(4));
-    meshes.push_back( scene.getMeshes().at(5));
-    std::shared_ptr<Object> tree = KdTree::buildTree( meshes );
-    tree->showMaxMin();
+    auto wall = scene.getMeshes().at(0);
+    auto light = scene.getMeshes().at(4);
+    auto wallBox = KdTree::buildTree( wall );
+    auto ligthBox  = KdTree::buildTree( light );
+    auto b1 = *wallBox;
+    auto b2 = *ligthBox;
+    Material temp = wall.material;
+    wall.material = light.material;
+    light.material = temp;
+    meshes.push_back( scene.getMeshes().at(0)); //中墙
+    //meshes.push_back( scene.getMeshes().at(1)); //右边蓝墙
+    //meshes.push_back( scene.getMeshes().at(2)); //左边红墙
+    //meshes.push_back( scene.getMeshes().at(3)); //左边球
+    meshes.push_back( scene.getMeshes().at(4)); //顶灯
+    //meshes.push_back( scene.getMeshes().at(5)); //右边球
+    scene.getMeshes().at(0).material.show();
+    scene.getMeshes().at(1).material.show();
+    scene.getMeshes().at(2).material.show();
+    scene.getMeshes().at(3).material.show();
+    scene.getMeshes().at(4).material.show();
+    scene.getMeshes().at(5).material.show();
+    //std::shared_ptr<Object> tree = KdTree::buildTree( meshes );
+    std::shared_ptr<Object> tree = KdTree::buildTree( scene.getMeshes() );
     auto t1 = KdTree::buildTree( meshes );
     KdTree t2 = *t1;
 
@@ -99,18 +115,26 @@ int main()
     waitKey( 0 );
      */
 
+    Normal n( glm::vec3( -1, 1, 0) );
+    auto sample = tracer.uniformSampleHemisphere( n );
+    cout << sample.x << " " << sample.y << " " << sample.z << endl;
+
+    glm::vec3 g1( 1, 1, 1 );
+    glm::vec3 g2( 0.1, 0.2, 0.3 );
+    auto g3 = g1*g2;
 
     float angle = -0;
     float tx = 0;
-    float ty = 0;
-    float tz = 0;
+    float ty = 4.6;
+    float tz = 13.5;
 
     bool end = false;
     while( !end )
     {
         glm::mat4x4 t;
         t = glm::translate( t, glm::vec3( tx, ty, tz) );
-        t = glm::rotate( t, glm::radians( angle), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+        t = glm::rotate( t, glm::radians( angle), glm::vec3( 1.0f, 0.0f, 0.0f ) );
+        //t = glm::rotate( t, glm::radians( angle1 ), glm::vec3( 1.0f, 0, 0 ) );
         camera.transform( t );
         camera.showPosition();
 

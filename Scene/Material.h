@@ -17,6 +17,7 @@ public:
     glm::vec3 specular; //高光系数
     float transparent; //1为完全不透明, 0为完全透明
     float opticalDensity; //光密度
+    glm::vec3 emission; //自发光
 
 public:
     Material( aiMaterial* aMaterial );
