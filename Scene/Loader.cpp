@@ -63,9 +63,9 @@ Mesh Loader::processMesh( aiMesh *mesh, const aiScene* scene )
 
         // normal
         glm::vec3 normal;
-        normal.x = mesh->mNormals[i].x;
-        normal.y = mesh->mNormals[i].y;
-        normal.z = mesh->mNormals[i].z;
+        normal.x = -1 * mesh->mNormals[i].x;
+        normal.y = -1 * mesh->mNormals[i].y;
+        normal.z = -1 * mesh->mNormals[i].z;
 
         vertices.push_back( Vertex( position, normal ) );
     }

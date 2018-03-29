@@ -1,5 +1,4 @@
 #include "PathTracing.h"
-#include "../Scene/Normal.h"
 
 cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
 {
@@ -8,20 +7,20 @@ cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
 
     Intersection inter;
     int hitNum = 0;
-    #pragma omp parallel
+    //#pragma omp parallel for
     for( int i = 0; i < camera.getHeight(); i++ )
         for( int j = 0; j < camera.getWidth(); j++ )
         {
             Ray ray = camera.generateRay( j, i );
-            glm::vec3 color = MCtrace( obj, ray, 1 );
-            if( obj->intersect( ray, inter ) )
-            {
+            glm::vec3 color = MCtrace( obj, ray );
+            //if( obj->intersect( ray, inter ) )
+            //{
                 img.at<cv::Vec3f>( i, j )[2] = color.x;
                 img.at<cv::Vec3f>( i, j )[1] = color.y;
                 img.at<cv::Vec3f>( i, j )[0] = color.z;
                 //imageBuffer.at(i).at(j)= inter.material->diffuse;
                 hitNum++;
-            }
+            //}
             std::cout << "i: " << i << " j: " << j << std::endl;
         }
 
@@ -38,18 +37,43 @@ glm::vec3 PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned i
     if( obj->intersect( ray, inter ) == false )
         return glm::vec3( 0, 0, 0 );
 
-    glm::vec3 diffuse( 0, 0, 0 );
+    //return inter.material->diffuse;
+
+    glm::vec3 indirectLight( 0, 0, 0 );
     Vertex interPoint = inter.point;
+    glm::vec3 interPosition = inter.point.getPosition();
+    //if( interPosition.y <= 11 && depth == 0)
+    //    std::cout << "in" << std::endl;
+    //if( inter.material->diffuse.z == 1)
+        //std::cout << "haha" << std::endl;
+    Normal interNormal = inter.point.getNormal();
     float pdf = (float)1 / 2*M_PI;
+    bool hitIndirect = false;
     for( unsigned int i = 0; i < sampleRayNum; i++ )
     {
-        Ray sampleRay( interPoint.getPosition(), interPoint.getNormal() );
-        float cosTheta = glm::dot( interPoint.getNormal(), sampleRay.getDirection().getNormal() );
-        diffuse += MCtrace( obj, sampleRay, depth+1 ) * cosTheta;
+        Ray sampleRay( interPosition, uniformSampleHemisphere( interNormal ) );
+        float cosTheta = glm::dot( interNormal.getNormal(), sampleRay.getDirection().getNormal() );
+        glm::vec3 sampleColor( 0, 0, 0 );
+        sampleColor = MCtrace( obj, sampleRay, depth+1 ) * cosTheta;
+        if( sampleColor.x != 0 || sampleColor.y != 0 || sampleColor.z != 0 )
+            hitIndirect = true;
+        indirectLight = indirectLight + sampleColor;
     }
-    diffuse = diffuse / ( pdf * sampleRayNum );
 
-    glm::vec3 color = inter.material->emission + diffuse * inter.material->diffuse;
+    if( hitIndirect )
+    {
+        std::cout << "hit hitIndirect" << std::endl;
+        indirectLight = indirectLight + glm::vec3( 1.1, 1.1, 1.1 );
+    }
+    //diffuse = diffuse / ( pdf * sampleRayNum );
+    //diffuse = diffuse / ( pdf  );
+    //if( diffuse.x == 0 ) diffuse.x = 0.5;
+    //if( diffuse.y == 0 ) diffuse.y = 0.5;
+    //if( diffuse.z == 0 ) diffuse.z = 0.5;
+    //diffuse = diffuse / ( pdf );
+
+    glm::vec3 color = inter.material->emission + indirectLight * inter.material->diffuse + ambientLight * inter.material->ambient;
+    //glm::vec3 color = inter.material->emission + diffuse * inter.material->diffuse + ambientLight * inter.material->ambient + glm::vec3( 0.1, 0.1, 0.1 );
     return color;
 }
 

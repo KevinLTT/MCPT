@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
+#include <omp.h>
 
 #include "../Accelerate/Object.h"
 #include "../Camera/Camera.h"
@@ -22,9 +23,15 @@ class PathTracing
 private:
     unsigned int maxDepth;
     unsigned int sampleRayNum;
+    glm::vec3 ambientLight;
 
 public:
-    PathTracing() { maxDepth = 5; sampleRayNum = 30; }
+    PathTracing() 
+    { 
+        maxDepth = 1; 
+        sampleRayNum = 10; 
+        ambientLight = glm::vec3( 0.2, 0.2, 0.2 );
+    }
     cv::Mat render( std::shared_ptr<Object> obj, Camera camera );
     glm::vec3 MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth = 0 );
     glm::vec3 uniformSampleHemisphere( const float r1, const float r2 );
