@@ -3,6 +3,7 @@ cmake_minimum_required( VERSION 3.0 )
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11"  )
 
 find_package( ASSIMP REQUIRED )
+set( OpenCV_DIR "/home/kevin/Desktop/SDK/OpenCV.3-3-1/share/OpenCV" )
 find_package( OpenCV REQUIRED )
 #find_package( OpenMP REQUIRED )
 #if(OPENMP_FOUND)
