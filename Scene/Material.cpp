@@ -31,6 +31,10 @@ Material::Material( aiMaterial* aMaterial )
     float ni;
     aMaterial->Get( AI_MATKEY_REFRACTI, ni );
     this->opticalDensity = ni;
+
+    float ns;
+    aMaterial->Get( AI_MATKEY_SHININESS, ns );
+    this->shininess = ns;
 }
 
 void Material::show()
@@ -42,6 +46,7 @@ void Material::show()
     std::cout << "Transparent: " << transparent << std::endl;
     std::cout << "Optical Density: " << opticalDensity << std::endl;
     std::cout << "Emission: " << emission.x << ", " << emission.y << ", " << emission.z << std::endl;
+    std::cout << "Shinimess: " << shininess << std::endl;
 }
 
 glm::vec3 aiColor3DtoGlmVec3( aiColor3D aColor )

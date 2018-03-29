@@ -39,7 +39,7 @@ private:
 public:
     PathTracing() 
     { 
-        maxDepth = 2; 
+        maxDepth = 2;
         sampleRayNum = 10; 
         ssp = 5;
         ambientLight = glm::vec3( 0.2, 0.2, 0.2 );
@@ -48,10 +48,15 @@ public:
     }
     cv::Mat render( std::shared_ptr<Object> obj, Camera camera );
     Color3f MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth = 0 );
+    Color3f trace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth = 0 );
     glm::vec3 uniformSampleHemisphere( const float r1, const float r2 );
     void createCoordinateSystem( Normal N, Normal& Nt, Normal& Nb );
     glm::vec3 uniformSampleHemisphere( Normal N );
+    glm::vec3 importanceSample( Normal N, float n = -1 );
     void generateNoise( float& x, float& y );
+    bool RussianRulette( float p );
+    float genRandom();
+    glm::vec3 local2world( Normal N, glm::vec3 localSample );
 };
 
 #endif

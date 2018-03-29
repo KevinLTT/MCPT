@@ -139,6 +139,7 @@ int main()
         camera.showPosition();
 
         auto img = tracer.render( tree, camera );
+        cv::imwrite( "out.jpg", img );
 
         imshow( "test", img );
         int key = waitKey( 0 );

@@ -25,8 +25,9 @@ public:
     //std::shared_ptr<Vertex> getOrigin();
     Vertex getOrigin();
     float getOrigin( int axis );
-    Normal getDirection();
+    Normal& getDirection();
     float getDirection( int axis );
+    glm::vec3 reflectDirection( Normal N );
 
     void normalize();
 };
