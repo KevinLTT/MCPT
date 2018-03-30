@@ -19,8 +19,6 @@ cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
                 generateNoise( px, py );
                 Ray ray = camera.generateRay( px, py );
                 color += MCtrace( obj, ray );
-
-                
             }
             color /= ssp;
             img.at<cv::Vec3f>( i, j )[2] = color.x;
@@ -46,8 +44,8 @@ Color3f PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int
 
     
     Color3f indirectIllumination = BACK_GROUND;
-    for( unsigned int i = 0; i < sampleRayNum; i++ )
-    {
+    //for( unsigned int i = 0; i < sampleRayNum; i++ )
+    //{
         if( inter.material->transparent >= 0 ) //not transparent, only reflectance
         {
             float diffuseComponent = glm::dot(inter.material->diffuse, glm::vec3(1, 1, 1) );
@@ -56,39 +54,45 @@ Color3f PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int
             Ray sampleRay;
             float theta, pdf;
             glm::vec3 illum( 0, 0, 0 );
-            if( RussianRulette( diffuseComponent / (specularComponent+diffuseComponent) ) )
-            //if( true )
+            //if( RussianRulette( diffuseComponent / (specularComponent+diffuseComponent) ) )
+            if( true )
             {
                 //diffuse win
                 sampleDirection = importanceSample( inter.getNormal() );
+                sampleDirection = uniformSampleHemisphere( inter.getNormal()  );
                 sampleRay = Ray( inter.getPosition(), sampleDirection );
+                Color3f sampleIllumination = MCtrace( obj, sampleRay, depth+1 );
                 theta = acos( sampleDirection.y );
                 pdf = sinf(theta) * cosf(theta) / M_PI;
+                indirectIllumination = inter.material->diffuse * sampleIllumination;
             }
             else
             {
                 //specular win
                 sampleDirection = importanceSample( inter.getNormal(), inter.material->shininess );
                 sampleRay = Ray( inter.getPosition(), sampleDirection );
+                Color3f sampleIllumination = MCtrace( obj, sampleRay, depth+1 );
                 theta = acos( sampleDirection.y );
                 pdf = (inter.material->shininess+1)*powf( cosf(theta), inter.material->shininess ) * sinf( theta ) / ( 2 * M_PI );
+                indirectIllumination = inter.material->specular * sampleIllumination;
             }
-            Color3f sampleIllumination = MCtrace( obj, sampleRay, depth+1 );
-            if( inter.material->shininess != 0 ) {
+            /*if( inter.material->shininess != 0 ) {
                 float specularK = powf(
                         fabs(glm::dot(ray.direction.getNormal(), sampleRay.reflectDirection(inter.getNormal()))),
                         inter.material->shininess);
                 illum += inter.material->specular * sampleIllumination * specularK;
-            }
-            illum += inter.material->diffuse * sampleIllumination * cosf( theta ) / (float)M_PI;
-            illum /= pdf * cosf(theta) ;
-            indirectIllumination += illum;
+            }*/
+            //illum += inter.material->diffuse * sampleIllumination * cosf( theta ) / (float)M_PI;
+            //illum /= pdf * cosf(theta) ;
+            //indirectIllumination += illum;
         }
 
-    }
-    indirectIllumination /= sampleRayNum;
+    //}
+    //indirectIllumination /= sampleRayNum;
+    //indirectIllumination /= sampleRayNum;
 
-    return inter.material->emission / (float)50 + indirectIllumination;
+    //return inter.material->emission / (float)50 + indirectIllumination;
+    return inter.material->emission + indirectIllumination + inter.material->ambient*ambientLight;
 
 }
 

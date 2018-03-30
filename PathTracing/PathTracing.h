@@ -39,9 +39,9 @@ private:
 public:
     PathTracing() 
     { 
-        maxDepth = 2;
+        maxDepth = 5;
         sampleRayNum = 10; 
-        ssp = 5;
+        ssp = 20;
         ambientLight = glm::vec3( 0.2, 0.2, 0.2 );
         generator.seed( time(0) );
         uniformDistribution = std::uniform_real_distribution<float>( 0, 1 );
