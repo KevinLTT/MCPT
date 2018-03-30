@@ -22,7 +22,7 @@ float Ray::getOrigin( int axis )
     return origin.getPosition( axis );
 }
 
-Normal Ray::getDirection()
+Normal& Ray::getDirection()
 {
     return direction;
 }
@@ -30,4 +30,9 @@ Normal Ray::getDirection()
 float Ray::getDirection( int axis )
 {
     return direction.getNormal( axis );
+}
+
+glm::vec3 Ray::reflectDirection( Normal N) {
+    Normal reflect(direction.getNormal() - 2.0f * glm::dot( N.getNormal(), direction.getNormal() ) * N.getNormal());
+    return reflect.getNormal();
 }

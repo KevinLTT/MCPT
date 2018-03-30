@@ -6,76 +6,96 @@ cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
     //cv::Mat img( camera.getWidth(), camera.getHeight(), CV_32FC3, cv::Scalar( 0, 0, 0 ) );
 
     Intersection inter;
-    int hitNum = 0;
-    //#pragma omp parallel for
+    float complete = 0;
+    #pragma omp parallel for
     for( int i = 0; i < camera.getHeight(); i++ )
+    {
         for( int j = 0; j < camera.getWidth(); j++ )
         {
-            Ray ray = camera.generateRay( j, i );
-            glm::vec3 color = MCtrace( obj, ray );
-            //if( obj->intersect( ray, inter ) )
-            //{
-                img.at<cv::Vec3f>( i, j )[2] = color.x;
-                img.at<cv::Vec3f>( i, j )[1] = color.y;
-                img.at<cv::Vec3f>( i, j )[0] = color.z;
-                //imageBuffer.at(i).at(j)= inter.material->diffuse;
-                hitNum++;
-            //}
-            std::cout << "i: " << i << " j: " << j << std::endl;
+            glm::vec3 color( 0, 0, 0 );
+            for( int k = 0; k < ssp; k++ )
+            {
+                float px = j, py = i;
+                generateNoise( px, py );
+                Ray ray = camera.generateRay( px, py );
+                color += MCtrace( obj, ray );
+            }
+            color /= ssp;
+            img.at<cv::Vec3f>( i, j )[2] = color.x;
+            img.at<cv::Vec3f>( i, j )[1] = color.y;
+            img.at<cv::Vec3f>( i, j )[0] = color.z;
         }
+        complete++;
+        std::cout << complete*100  / camera.getHeight() << "%" << std::endl;
+    }
 
-    std::cout << "hit: " << hitNum << std::endl;
     return img;
 }
 
-glm::vec3 PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth )
+Color3f PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth )
 {
-    if( depth > maxDepth )
-        return glm::vec3( 0, 0, 0 );
 
     Intersection inter;
     if( obj->intersect( ray, inter ) == false )
-        return glm::vec3( 0, 0, 0 );
+        return BACK_GROUND;
 
-    //return inter.material->diffuse;
+    else if( depth >= maxDepth )
+        return inter.material->emission;
 
-    glm::vec3 indirectLight( 0, 0, 0 );
-    Vertex interPoint = inter.point;
-    glm::vec3 interPosition = inter.point.getPosition();
-    //if( interPosition.y <= 11 && depth == 0)
-    //    std::cout << "in" << std::endl;
-    //if( inter.material->diffuse.z == 1)
-        //std::cout << "haha" << std::endl;
-    Normal interNormal = inter.point.getNormal();
-    float pdf = (float)1 / 2*M_PI;
-    bool hitIndirect = false;
-    for( unsigned int i = 0; i < sampleRayNum; i++ )
-    {
-        Ray sampleRay( interPosition, uniformSampleHemisphere( interNormal ) );
-        float cosTheta = glm::dot( interNormal.getNormal(), sampleRay.getDirection().getNormal() );
-        glm::vec3 sampleColor( 0, 0, 0 );
-        sampleColor = MCtrace( obj, sampleRay, depth+1 ) * cosTheta;
-        if( sampleColor.x != 0 || sampleColor.y != 0 || sampleColor.z != 0 )
-            hitIndirect = true;
-        indirectLight = indirectLight + sampleColor;
-    }
+    
+    Color3f indirectIllumination = BACK_GROUND;
+    //for( unsigned int i = 0; i < sampleRayNum; i++ )
+    //{
+        if( inter.material->transparent >= 0 ) //not transparent, only reflectance
+        {
+            float diffuseComponent = glm::dot(inter.material->diffuse, glm::vec3(1, 1, 1) );
+            float specularComponent = glm::dot( inter.material->specular, glm::vec3( 1, 1, 1) );
+            glm::vec3 sampleDirection;
+            Ray sampleRay;
+            float theta, pdf;
+            glm::vec3 illum( 0, 0, 0 );
+            //if( RussianRulette( diffuseComponent / (specularComponent+diffuseComponent) ) )
+            if( true )
+            {
+                //diffuse win
+                sampleDirection = importanceSample( inter.getNormal() );
+                sampleDirection = uniformSampleHemisphere( inter.getNormal()  );
+                sampleRay = Ray( inter.getPosition(), sampleDirection );
+                Color3f sampleIllumination = MCtrace( obj, sampleRay, depth+1 );
+                theta = acos( sampleDirection.y );
+                pdf = sinf(theta) * cosf(theta) / M_PI;
+                indirectIllumination = inter.material->diffuse * sampleIllumination;
+            }
+            else
+            {
+                //specular win
+                sampleDirection = importanceSample( inter.getNormal(), inter.material->shininess );
+                sampleRay = Ray( inter.getPosition(), sampleDirection );
+                Color3f sampleIllumination = MCtrace( obj, sampleRay, depth+1 );
+                theta = acos( sampleDirection.y );
+                pdf = (inter.material->shininess+1)*powf( cosf(theta), inter.material->shininess ) * sinf( theta ) / ( 2 * M_PI );
+                indirectIllumination = inter.material->specular * sampleIllumination;
+            }
+            /*if( inter.material->shininess != 0 ) {
+                float specularK = powf(
+                        fabs(glm::dot(ray.direction.getNormal(), sampleRay.reflectDirection(inter.getNormal()))),
+                        inter.material->shininess);
+                illum += inter.material->specular * sampleIllumination * specularK;
+            }*/
+            //illum += inter.material->diffuse * sampleIllumination * cosf( theta ) / (float)M_PI;
+            //illum /= pdf * cosf(theta) ;
+            //indirectIllumination += illum;
+        }
 
-    if( hitIndirect )
-    {
-        std::cout << "hit hitIndirect" << std::endl;
-        indirectLight = indirectLight + glm::vec3( 1.1, 1.1, 1.1 );
-    }
-    //diffuse = diffuse / ( pdf * sampleRayNum );
-    //diffuse = diffuse / ( pdf  );
-    //if( diffuse.x == 0 ) diffuse.x = 0.5;
-    //if( diffuse.y == 0 ) diffuse.y = 0.5;
-    //if( diffuse.z == 0 ) diffuse.z = 0.5;
-    //diffuse = diffuse / ( pdf );
+    //}
+    //indirectIllumination /= sampleRayNum;
+    //indirectIllumination /= sampleRayNum;
 
-    glm::vec3 color = inter.material->emission + indirectLight * inter.material->diffuse + ambientLight * inter.material->ambient;
-    //glm::vec3 color = inter.material->emission + diffuse * inter.material->diffuse + ambientLight * inter.material->ambient + glm::vec3( 0.1, 0.1, 0.1 );
-    return color;
+    //return inter.material->emission / (float)50 + indirectIllumination;
+    return inter.material->emission + indirectIllumination + inter.material->ambient*ambientLight;
+
 }
+
 
 glm::vec3 PathTracing::uniformSampleHemisphere( const float r1, const float r2 )
 {
@@ -97,24 +117,51 @@ void PathTracing::createCoordinateSystem(  Normal N, Normal& Nt, Normal& Nb )
 
 glm::vec3 PathTracing::uniformSampleHemisphere( Normal N )
 {
-    std::mersenne_twister_engine<std::uint_fast32_t, 32, 624, 397, 31,
+    /*std::mersenne_twister_engine<std::uint_fast32_t, 32, 624, 397, 31,
                              0x9908b0df, 11,
                              0xffffffff, 7,
                              0x9d2c5680, 15,
                              0xefc60000, 18, 1812433253> generator(time(0));
+*/
+    //std::uniform_real_distribution<float> distribution( 0, 1 );
 
-    std::uniform_real_distribution<float> distribution( 0, 1 );
-
-    float r1 = distribution( generator );
-    float r2 = distribution( generator );
+    float r1 = genRandom();
+    float r2 = genRandom();
     glm::vec3 localSample = uniformSampleHemisphere( r1, r2 );
 
+    return local2world( N, localSample );
+}
+
+glm::vec3 PathTracing::importanceSample(Normal N, float n) {
+    float r1 = genRandom();
+    float r2 = genRandom();
+
+    float phi = r1 * 2 * M_PI;
+    float theta = n < 0 ? asin(sqrtf(r2)) : acos( powf( r2, (float)1 / (n+1) ));
+    glm::vec3 localSample( sin(theta)*cos(phi), cos(theta), sin(theta)*sin(phi) );
+
+    return local2world( N, localSample );
+}
+
+glm::vec3 PathTracing::local2world(Normal N, glm::vec3 localSample) {
     Normal Nt, Nb;
     createCoordinateSystem( N, Nt, Nb );
     glm::mat3x3 transform( Nb.getNormal(), N.getNormal(), Nt.getNormal() );
-
-    glm::vec3 sample = transform*localSample;
-
-    return sample;
+    return transform*localSample;
 }
 
+void PathTracing::generateNoise( float& x, float& y )
+{
+    x += genRandom() - 0.5;
+    y += genRandom() - 0.5;
+    return;
+}
+
+bool PathTracing::RussianRulette(float p) {
+    return genRandom() < p ? true : false;
+}
+
+float PathTracing::genRandom()
+{
+    return uniformDistribution( generator );
+}

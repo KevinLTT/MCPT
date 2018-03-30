@@ -35,6 +35,8 @@ public:
             obj = o;
         }
     }
+    glm::vec3 getPosition() { return point.getPosition(); }
+    glm::vec3 getNormal() {return point.getNormal(); }
 };
 
 #endif
