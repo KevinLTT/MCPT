@@ -20,6 +20,7 @@ Triangular::Triangular( std::vector<Vertex> vs, std::shared_ptr<Material> m ):
 bool Triangular::intersect( Ray ray, Intersection& intersection )
 { 
     //std::cout << "Triangular" << std::endl; 
+    
 
     glm::vec3 Dcolumn1 = glm::vec3( A.x-B.x, A.y-B.y, A.z-B.z );
     glm::vec3 Dcolumn2 = glm::vec3( A.x-C.x, A.y-C.y, A.z-C.z );
@@ -40,7 +41,15 @@ bool Triangular::intersect( Ray ray, Intersection& intersection )
         intersectionPoint.position.z = ray.getOrigin( Z_AXIS ) + t*ray.getDirection( Z_AXIS );
 
         glm::vec3 interpolationNormal = (1-beta-gama)*vertices[0].getNormal() + beta*vertices[1].getNormal() + gama*vertices[2].getNormal();
+        //glm::vec3 AB = glm::vec3( B.x-A.x, B.y-A.y, B.z-A.z );
+        //glm::vec3 AC = glm::vec3( C.x-A.x, C.y-A.y, C.z-A.z );
+        //Normal n( glm::cross( AB, AC ) );
+        ////if( fabs( glm::dot( interpolationNormal, ray.getDirection().getNormal() ) ) < EPSILON )
+            //return false;
+
         intersectionPoint.setNormal( interpolationNormal );
+        //intersectionPoint.setNormal( -1.0f*n.getNormal() );
+        //intersectionPoint.setNormal( vertices[0].getNormal() );
 
         intersection.point = intersectionPoint;
         intersection.material = this->material;

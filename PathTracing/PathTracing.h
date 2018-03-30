@@ -19,7 +19,10 @@
 
 enum RAY_TYPE
 {
-DIFFUSE
+DIFFUSE,
+REFLECT,
+REFRACT,
+NONE,
 };
 
 class PathTracing
@@ -39,9 +42,9 @@ private:
 public:
     PathTracing() 
     { 
-        maxDepth = 5;
+        maxDepth = 10;
         sampleRayNum = 10; 
-        ssp = 20;
+        ssp = 10;
         ambientLight = glm::vec3( 0.2, 0.2, 0.2 );
         generator.seed( time(0) );
         uniformDistribution = std::uniform_real_distribution<float>( 0, 1 );

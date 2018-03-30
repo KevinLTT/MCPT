@@ -47,7 +47,7 @@ bool AABB::boxIntersect( Ray ray )
             tFar = t2;
     }
 
-    if( tNear > tFar || tFar <= EPSILON )
+    if( tNear > tFar || tFar <= EPSILON || tNear > OBJECT_MAX )
         return false;
     else 
         return true;

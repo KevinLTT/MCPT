@@ -36,3 +36,18 @@ glm::vec3 Ray::reflectDirection( Normal N) {
     Normal reflect(direction.getNormal() - 2.0f * glm::dot( N.getNormal(), direction.getNormal() ) * N.getNormal());
     return reflect.getNormal();
 }
+
+bool Ray::able2refract( glm::vec3 normal, float nit, glm::vec3& refractDirection )
+{
+    float ndoti = glm::dot( normal, direction.getNormal()  );
+    float k = 1.0f - nit*nit*( 1.0f - ndoti * ndoti );
+    if( k >= 0.0f )
+    {
+        refractDirection = nit*direction.getNormal() - normal * ( nit*ndoti + sqrtf(k) );
+        Normal temp( refractDirection );
+        refractDirection = temp.getNormal();
+        return true;
+    }
+    else
+        return false;
+}

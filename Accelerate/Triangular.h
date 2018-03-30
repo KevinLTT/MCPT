@@ -8,6 +8,7 @@
 #include "../Scene/Scene.h"
 #include "../Scene/Material.h"
 #include "Primitive.h"
+#include "../Config/config.h"
 
 class Triangular : public Primitive
 {

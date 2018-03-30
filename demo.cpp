@@ -74,7 +74,7 @@ int main()
     //triTree->showMaxMin();
     KdTree tttt = KdTree( objs );
 */
-    Scene scene( "../Obj/scene01.obj" );
+    Scene scene( "../Obj/scene03.obj" );
     vector<Mesh> meshes;
     auto wall = scene.getMeshes().at(0);
     auto light = scene.getMeshes().at(4);
@@ -119,18 +119,12 @@ int main()
     auto sample = tracer.uniformSampleHemisphere( n );
     cout << sample.x << " " << sample.y << " " << sample.z << endl;
 
-    glm::vec3 g1( 1, 1, 1 );
-    glm::vec3 g2( 0.1, 0.2, 0.3 );
-    auto g3 = g1*g2;
 
     float angle = -0;
     float tx = 0;
     float ty = 4.6;
     float tz = 13.5;
 
-    bool end = false;
-    while( !end )
-    {
         glm::mat4x4 t;
         t = glm::translate( t, glm::vec3( tx, ty, tz) );
         t = glm::rotate( t, glm::radians( angle), glm::vec3( 1.0f, 0.0f, 0.0f ) );
@@ -139,43 +133,11 @@ int main()
         camera.showPosition();
 
         auto img = tracer.render( tree, camera );
-        cv::imwrite( "out.jpg", img );
 
         imshow( "test", img );
-        int key = waitKey( 0 );
-        switch( key )
-        {
-            case UP:
-                ty += MOVE_SPEED;
-                break;
-            case DOWN:
-                ty -= MOVE_SPEED;
-                break;
-            case LEFT:
-                tx -= MOVE_SPEED;
-                break;
-            case RIGHT:
-                tx += MOVE_SPEED;
-                break;
-            case ZOOM_IN:
-                tz -= MOVE_SPEED;
-                break;
-            case ZOOM_OUT:
-                tz += MOVE_SPEED;
-                break;
-            case QUIT:
-                end = true;
-                break;
-            case TURN_LEFT:
-                angle--;
-                break;
-            case TURN_RIGHT:
-                angle++;
-                break;
-            default:
-                break;
-        }
-    }
+        waitKey( 0 );
+        img.convertTo( img, CV_8UC3 );
+        imwrite( "result.jpg", img );
 
 
 

@@ -28,6 +28,7 @@ public:
     Normal& getDirection();
     float getDirection( int axis );
     glm::vec3 reflectDirection( Normal N );
+    bool able2refract( glm::vec3 normal, float nit, glm::vec3& refractDirection );
 
     void normalize();
 };
