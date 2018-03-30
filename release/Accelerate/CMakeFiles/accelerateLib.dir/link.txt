@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaccelerateLib.a  CMakeFiles/accelerateLib.dir/KdTree.cpp.o CMakeFiles/accelerateLib.dir/Primitive.cpp.o CMakeFiles/accelerateLib.dir/BoundingBox.cpp.o CMakeFiles/accelerateLib.dir/AABB.cpp.o CMakeFiles/accelerateLib.dir/Triangular.cpp.o
+/usr/bin/ranlib libaccelerateLib.a

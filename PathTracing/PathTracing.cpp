@@ -1,4 +1,5 @@
 #include "PathTracing.h"
+#include <cstdio>
 
 float fresnel( float ni, float nt, float cosTheta )
 {
@@ -7,10 +8,10 @@ float fresnel( float ni, float nt, float cosTheta )
     return f0 + ( 1 - f0 ) * powf( 1.0f-cosTheta, 5 );
 }
 
-cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
+cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera, int SSP )
 {
-    cv::Mat img( camera.getHeight(), camera.getWidth(), CV_32FC3, cv::Scalar( 0, 0, 0 ) );
-    //cv::Mat img( camera.getWidth(), camera.getHeight(), CV_32FC3, cv::Scalar( 0, 0, 0 ) );
+    //cv::Mat img( camera.getHeight(), camera.getWidth(), CV_32FC3, cv::Scalar( 0, 0, 0 ) );
+    cv::Mat img( camera.getWidth(), camera.getHeight(), CV_8UC3, cv::Scalar( 0, 0, 0 ) );
 
     Intersection inter;
     float complete = 0;
@@ -20,20 +21,21 @@ cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera )
         for( int j = 0; j < camera.getWidth(); j++ )
         {
             glm::vec3 color( 0, 0, 0 );
-            for( int k = 0; k < ssp; k++ )
+            for( int k = 0; k < SSP; k++ )
             {
                 float px = j, py = i;
                 generateNoise( px, py );
                 Ray ray = camera.generateRay( px, py );
                 color += MCtrace( obj, ray );
             }
-            color /= ssp;
-            img.at<cv::Vec3f>( i, j )[2] = color.x;
-            img.at<cv::Vec3f>( i, j )[1] = color.y;
-            img.at<cv::Vec3f>( i, j )[0] = color.z;
+            color /= SSP; 
+            img.at<cv::Vec3b>( i, j )[2] = color.x >= 1.0f ? 255 : color.x*255;
+            img.at<cv::Vec3b>( i, j )[1] = color.y >= 1.0f ? 255 : color.y*255;
+            img.at<cv::Vec3b>( i, j )[0] = color.z >= 1.0f ? 255 : color.z*255;
         }
         complete++;
         std::cout << complete*100  / camera.getHeight() << "%" << std::endl;
+        //printf( "%.2f%%\r", complete*100 / camera.getHeight() );
     }
 
     //for( unsigned int k = 0; k < ssp; k++ )
@@ -153,8 +155,8 @@ Color3f PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int
             }
         }*/
     }
-    else
-    //if( !sampled )
+    //else
+    if( !sampled )
     {
         float diffuseComponent = glm::dot(inter.material->diffuse, glm::vec3(1, 1, 1) );
         float specularComponent = glm::dot( inter.material->specular, glm::vec3( 1, 1, 1) );

@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include "../Scene/Normal.h"
 #include "../Ray/Ray.h"
+#include "../Accelerate/Object.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 //a simple camera whose initial position is ( 0, 0, 0 ) and face direction is ( 0, 0, -1 )
 class Camera
@@ -26,6 +28,7 @@ public:
     int getWidth() { return width; }
     int getHeight() { return height; };
     void showPosition() { std::cout << "x: " << position.x << " y: " << position.y << " z: " << position.z << std::endl; }
+    void setPosition( std::shared_ptr<Object> obj );
 };
 
 #endif

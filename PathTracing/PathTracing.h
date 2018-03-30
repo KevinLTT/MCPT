@@ -29,8 +29,6 @@ class PathTracing
 {
 private:
     unsigned int maxDepth;
-    unsigned int sampleRayNum;
-    unsigned int ssp;
     glm::vec3 ambientLight;
     std::mersenne_twister_engine<std::uint_fast32_t, 32, 624, 397, 31,
         0x9908b0df, 11,
@@ -43,13 +41,11 @@ public:
     PathTracing() 
     { 
         maxDepth = 10;
-        sampleRayNum = 10; 
-        ssp = 10;
         ambientLight = glm::vec3( 0.2, 0.2, 0.2 );
         generator.seed( time(0) );
         uniformDistribution = std::uniform_real_distribution<float>( 0, 1 );
     }
-    cv::Mat render( std::shared_ptr<Object> obj, Camera camera );
+    cv::Mat render( std::shared_ptr<Object> obj, Camera camera, int SSP = 10 );
     Color3f MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth = 0 );
     Color3f trace( std::shared_ptr<Object> obj, Ray ray, unsigned int depth = 0 );
     glm::vec3 uniformSampleHemisphere( const float r1, const float r2 );

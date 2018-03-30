@@ -35,4 +35,13 @@ void Camera::transform( glm::mat4x4 t )
     position = position / position.w;
 }
     
+void Camera::setPosition( std::shared_ptr<Object> obj )
+{
+    glm::vec3 center;
+    center = ( obj->getMax() + obj->getMin() ) / 2.0f;
+    float zoom = obj->getMax(Z_AXIS) - obj->getMin( Z_AXIS );
 
+    glm::mat4x4 t;
+    t = glm::translate( t, glm::vec3( center.x, center.y, center.z + zoom  ) );
+    transform( t );
+}
