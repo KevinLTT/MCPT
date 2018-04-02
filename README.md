@@ -49,4 +49,4 @@ make
 * PathTracing: 蒙特卡洛路径追踪的实现, 通过输入相机及Object返回图片.
 
 ## 运行结果
-
+见results文件夹
