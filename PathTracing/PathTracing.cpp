@@ -10,7 +10,6 @@ float fresnel( float ni, float nt, float cosTheta )
 
 cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera, int SSP )
 {
-    //cv::Mat img( camera.getHeight(), camera.getWidth(), CV_32FC3, cv::Scalar( 0, 0, 0 ) );
     cv::Mat img( camera.getWidth(), camera.getHeight(), CV_8UC3, cv::Scalar( 0, 0, 0 ) );
 
     Intersection inter;
@@ -37,25 +36,6 @@ cv::Mat PathTracing::render( std::shared_ptr<Object> obj, Camera camera, int SSP
         std::cout << complete*100  / camera.getHeight() << "%" << std::endl;
         //printf( "%.2f%%\r", complete*100 / camera.getHeight() );
     }
-
-    //for( unsigned int k = 0; k < ssp; k++ )
-    //{
-        //for( int i = 0; i < camera.getHeight(); i++ )
-        //{
-            //for( int j = 0; j < camera.getWidth(); j++ )
-            //{
-                //float px = j, py = i;
-                //generateNoise( px, py );
-                //Ray ray = camera.generateRay( px, py );
-                //auto color = MCtrace( obj, ray );
-                //for( int l = 0; l < 3; l++ )
-                    //img.at<cv::Vec3f>( i, j )[l] = ( img.at<cv::Vec3f>( i, j )[l] * k + color.x ) / ( k+1 );
-            //}
-        //}
-        //s++;
-        //std::cout << "ssp: " << s << std::endl;
-        //imshow( "render", img );
-    //}
 
     return img;
 }
@@ -110,52 +90,7 @@ Color3f PathTracing::MCtrace( std::shared_ptr<Object> obj, Ray ray, unsigned int
             sampled = true;
         }
          
-
-        /*glm::vec3 nl;
-        float nc = 1.0, nt = inter.material->opticalDensity;
-        float nnt;
-        bool into;
-        if( glm::dot( ray.getDirection().getNormal(), inter.getNormal()) < 0 )
-        {
-            nl = inter.getNormal();
-            nnt = nc / nt;
-            into = true;
-        }
-        else
-        {
-            nl = -1.0f * inter.getNormal();
-            nnt = nt / nc;
-            into = false;
-        }
-        float ddn = glm::dot( ray.getDirection().getNormal(), nl );
-        
-        float cos2t = 1 - nnt*nnt*( 1 - ddn*ddn );
-        if( cos2t < 0 ) //Total internal reflection
-        {
-            sampleDirection = ray.reflectDirection( inter.getNormal() );
-            rayType = RAY_TYPE::REFLECT;
-            sampled = true;
-        }
-        else
-        {
-            Normal tdir( (ray.getDirection().getNormal() * nnt - inter.getNormal() * (( into?1.0f:-1.0f ) * (ddn*nnt+sqrtf(cos2t))) ) );
-            glm::vec3 tdirection = tdir.getNormal();
-            float a = nt-nc, b = nt+nc;
-            float R0 = a*a/(b*b), c = 1 - ( into ? -ddn : glm::dot( tdirection, inter.getNormal() ) );
-            float Re = R0 + ( 1- R0 ) * powf( c, 5 ), Tr = 1 - Re;
-            if( RussianRulette( Tr ) )
-            {
-                sampleDirection = tdirection;
-                rayType = RAY_TYPE::REFRACT;
-            }
-            else
-            {
-                sampleDirection = ray.reflectDirection( inter.getNormal() );
-                rayType = RAY_TYPE::REFLECT;
-            }
-        }*/
     }
-    //else
     if( !sampled )
     {
         float diffuseComponent = glm::dot(inter.material->diffuse, glm::vec3(1, 1, 1) );
@@ -209,14 +144,6 @@ void PathTracing::createCoordinateSystem(  Normal N, Normal& Nt, Normal& Nb )
 
 glm::vec3 PathTracing::uniformSampleHemisphere( Normal N )
 {
-    /*std::mersenne_twister_engine<std::uint_fast32_t, 32, 624, 397, 31,
-                             0x9908b0df, 11,
-                             0xffffffff, 7,
-                             0x9d2c5680, 15,
-                             0xefc60000, 18, 1812433253> generator(time(0));
-*/
-    //std::uniform_real_distribution<float> distribution( 0, 1 );
-
     float r1 = genRandom();
     float r2 = genRandom();
     glm::vec3 localSample = uniformSampleHemisphere( r1, r2 );

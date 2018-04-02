@@ -1,2 +1,0 @@
-/usr/bin/ar qc libsceneLib.a  CMakeFiles/sceneLib.dir/Mesh.cpp.o CMakeFiles/sceneLib.dir/Vertex.cpp.o CMakeFiles/sceneLib.dir/Material.cpp.o CMakeFiles/sceneLib.dir/Loader.cpp.o CMakeFiles/sceneLib.dir/Scene.cpp.o
-/usr/bin/ranlib libsceneLib.a

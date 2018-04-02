@@ -1,5 +1,10 @@
 build/
 cmake-build-debug/
+balls_release/
+cornel-release/
+wall_release/
+release/
+*.swo
 .idea/
 
 *.swp

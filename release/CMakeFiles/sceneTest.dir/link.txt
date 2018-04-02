@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -fopenmp   CMakeFiles/sceneTest.dir/sceneTest.cpp.o  -o sceneTest -rdynamic Scene/libsceneLib.a -lassimp 

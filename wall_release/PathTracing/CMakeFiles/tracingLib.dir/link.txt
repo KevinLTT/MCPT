@@ -1,2 +1,0 @@
-/usr/bin/ar qc libtracingLib.a  CMakeFiles/tracingLib.dir/PathTracing.cpp.o
-/usr/bin/ranlib libtracingLib.a
